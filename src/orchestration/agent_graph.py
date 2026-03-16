@@ -4,6 +4,7 @@ from typing import Any
 
 from src.agent_base import AgentBase
 from src.models import AgentObservation, IncidentContext, InvestigationResult
+from src.strands_runtime import StrandsWorkflow
 from src.services.dynamodb_service import DynamoDBService
 from src.telemetry import log_event, metric, trace_span
 
@@ -17,10 +18,22 @@ class AgentGraph:
         observations: list[AgentObservation] = []
         state = dict(initial_state)
         with trace_span("agent-graph", incident_id=incident.incident_id):
+            workflow = StrandsWorkflow()
             for agent in self.agents:
-                observation = agent.execute(incident=incident, state=state)
-                observations.append(observation)
-                state[agent.name] = observation.to_dict()
+                workflow.add_task(
+                    name=agent.name,
+                    run=lambda workflow_state, current_agent=agent: current_agent.execute(
+                        incident=incident,
+                        state=workflow_state,
+                    ),
+                )
+
+            state = workflow.execute(**state)
+            for agent in self.agents:
+                task_result = state.get(agent.name)
+                if isinstance(task_result, AgentObservation):
+                    observations.append(task_result)
+                    state[agent.name] = task_result.to_dict()
             metric("InvestigationCompleted", 1, unit="Count", severity=incident.severity)
             log_event("investigation.completed", incident_id=incident.incident_id, observations=len(observations))
         return observations, state

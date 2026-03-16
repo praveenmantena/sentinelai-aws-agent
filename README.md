@@ -8,13 +8,13 @@ The platform is built for engineers who need faster incident triage in AWS envir
 
 ## Architecture diagram
 
-![System Architecture](./diagrams/system_architecture.png)
+![System Architecture](./diagrams/SentinelAI_System_Architecture.png)
 
 ![Agent Architecture](./diagrams/agent_architecture.png)
 
 ![RAG Flow](./diagrams/rag_flow.png)
 
-![AWS Service Integration](./diagrams/aws_service_integration.png)
+<!-- ![AWS Service Integration](./diagrams/aws_service_integration.png) -->
 
 ## Multi-agent system explanation
 
