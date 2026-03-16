@@ -1,0 +1,36 @@
+[
+  {
+    "name": "api-gateway-5xx-spike",
+    "event": {
+      "source": "aws.cloudwatch",
+      "detail-type": "CloudWatch Alarm State Change",
+      "detail": {
+        "alarmName": "HighApi5xxRate",
+        "severity": "SEV2",
+        "description": "API Gateway 5xx error rate exceeded threshold",
+        "state": {
+          "value": "ALARM",
+          "reason": "5xx error rate exceeded 5% for 5 minutes"
+        },
+        "logGroupName": "/aws/lambda/sentinelai-aws-agent"
+      }
+    }
+  },
+  {
+    "name": "lambda-throttling",
+    "event": {
+      "source": "aws.cloudwatch",
+      "detail-type": "CloudWatch Alarm State Change",
+      "detail": {
+        "alarmName": "LambdaThrottlesCritical",
+        "severity": "SEV2",
+        "description": "Lambda throttle count breached threshold",
+        "state": {
+          "value": "ALARM",
+          "reason": "Throttle count exceeded 100 over the last 5 minutes"
+        },
+        "logGroupName": "/aws/lambda/sentinelai-aws-agent"
+      }
+    }
+  }
+]

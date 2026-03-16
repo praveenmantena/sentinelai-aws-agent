@@ -1,0 +1,30 @@
+{
+  "585d54aa-5514-4e10-bef4-5ae240d3a663": {
+    "incident_id": "585d54aa-5514-4e10-bef4-5ae240d3a663",
+    "incident_title": "HighApi5xxRate",
+    "approved_by": "oncall.engineer",
+    "updated_at": "2026-03-16T13:09:28.438850+00:00",
+    "approvals": [
+      {
+        "step": "Throttle non-critical Lambda concurrency or enable reserved concurrency to reduce connection spikes.",
+        "decision": "approve",
+        "reason": ""
+      },
+      {
+        "step": "Switch the impacted workload to RDS Proxy or reduce connection pool size in application settings.",
+        "decision": "approve",
+        "reason": ""
+      },
+      {
+        "step": "Review the most recent deployment and roll back if the latency regression aligns with the alarm timestamp.",
+        "decision": "approve",
+        "reason": ""
+      },
+      {
+        "step": "Create a follow-up action item to add a CloudWatch dashboard tracking DB connections and API latency together.",
+        "decision": "approve",
+        "reason": ""
+      }
+    ]
+  }
+}

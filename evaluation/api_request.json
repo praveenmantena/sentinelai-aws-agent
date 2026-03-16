@@ -1,0 +1,14 @@
+{
+  "source": "aws.cloudwatch",
+  "detail-type": "CloudWatch Alarm State Change",
+  "detail": {
+    "alarmName": "HighApi5xxRate",
+    "severity": "SEV2",
+    "description": "API Gateway 5xx error rate exceeded threshold",
+    "state": {
+      "value": "ALARM",
+      "reason": "5xx error rate exceeded 5% for 5 minutes"
+    },
+    "logGroupName": "/aws/lambda/sentinelai-aws-agent"
+  }
+}

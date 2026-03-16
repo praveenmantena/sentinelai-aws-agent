@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SentinelAI AWS Agent UI</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero-main">
+        <p class="eyebrow">Enterprise Incident Console</p>
+        <h1>SentinelAI AWS Agent</h1>
+        <p>Operational incident triage and remediation governance in one lightweight web app.</p>
+      </div>
+      <div class="hero-meta">
+        <button id="nav-investigation" class="pill" type="button">Autonomous Investigation</button>
+        <button id="nav-approval" class="pill" type="button">Approval Workflow</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="card" id="investigation-section">
+        <h2>Run Investigation</h2>
+        <div class="endpoint-box">
+          <span class="endpoint-label">API Endpoint</span>
+          <code id="api-endpoint">http://localhost:9000/incidents</code>
+          <span class="endpoint-note">Local mock profile is active. The UI will use localhost automatically.</span>
+        </div>
+
+        <label for="incident-json">Incident Event JSON</label>
+        <textarea id="incident-json" rows="14"></textarea>
+
+        <div class="row">
+          <button id="run-btn">Run Investigation</button>
+          <button id="sample-btn" class="secondary">Load Sample</button>
+        </div>
+        <p id="status" class="status"></p>
+      </section>
+
+      <section class="card" id="result-card">
+        <div class="section-title-row">
+          <h2>Investigation Response</h2>
+          <span id="severity-chip" class="severity-chip">Unknown</span>
+        </div>
+
+        <div class="metrics">
+          <div><span>Incident ID</span><strong id="incident-id">-</strong></div>
+          <div><span>Severity</span><strong id="severity">-</strong></div>
+          <div><span>Confidence</span><strong id="confidence">-</strong></div>
+          <div><span>Source</span><strong id="incident-source">-</strong></div>
+        </div>
+
+        <h3>Root Cause</h3>
+        <p id="root-cause" class="callout">Run investigation to populate root cause analysis.</p>
+
+        <h3>Diagnosis</h3>
+        <p id="diagnosis">Run investigation to populate diagnosis.</p>
+
+        <h3>Agent Investigation Timeline</h3>
+        <div id="timeline" class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-agent">Awaiting Investigation</div>
+            <div class="timeline-summary">Execute an incident investigation to render agent trace timeline.</div>
+          </div>
+        </div>
+
+        <h3 id="approval-section">Remediation Approvals</h3>
+        <div id="approval-summary" class="approval-summary">Approvals: 0 approved, 0 rejected, 0 pending</div>
+        <div id="remediations"></div>
+        <div class="row">
+          <input id="reviewer" type="text" placeholder="reviewer name" value="oncall.engineer" />
+          <button id="save-approvals" class="secondary">Save Approvals</button>
+        </div>
+        <p id="approval-status" class="status"></p>
+
+        <details>
+          <summary>Raw Response JSON</summary>
+          <pre id="raw-json"></pre>
+        </details>
+
+        <details>
+          <summary>Retrieved Documents</summary>
+          <pre id="retrieved-docs"></pre>
+        </details>
+
+        <details>
+          <summary>Agent Trace</summary>
+          <pre id="agent-trace"></pre>
+        </details>
+
+        <details>
+          <summary>Approval History</summary>
+          <pre id="approval-history"></pre>
+        </details>
+      </section>
+    </main>
+
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

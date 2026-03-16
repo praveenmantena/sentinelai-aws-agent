@@ -1,0 +1,24 @@
+{
+  "local-test-1": {
+    "incident_id": "local-test-1",
+    "reviewer": "qa",
+    "approvals": [
+      {
+        "step": "Rollback",
+        "decision": "approve",
+        "reason": "safe"
+      }
+    ]
+  },
+  "localhost-test": {
+    "incident_id": "localhost-test",
+    "reviewer": "qa",
+    "approvals": [
+      {
+        "step": "Restart service",
+        "decision": "approve",
+        "reason": "verified"
+      }
+    ]
+  }
+}

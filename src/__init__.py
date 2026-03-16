@@ -1,0 +1,1 @@
+"""SentinelAI AWS Agent package."""
