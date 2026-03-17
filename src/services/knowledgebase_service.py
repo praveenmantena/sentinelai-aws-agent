@@ -24,12 +24,14 @@ class KnowledgeBaseService:
                     "uri": "s3://knowledge-base/runbooks/lambda-aurora-connections.md",
                     "excerpt": "Use RDS Proxy or tune pool size when Lambda concurrency increases suddenly.",
                     "score": 0.94,
+                    "mode": "fallback",
                 },
                 {
                     "title": "API Gateway 5xx troubleshooting",
                     "uri": "s3://knowledge-base/runbooks/api-gateway-5xx.md",
                     "excerpt": "Correlate request spikes, downstream latency, and recent deployments before scaling blindly.",
                     "score": 0.87,
+                    "mode": "fallback",
                 },
             ]
 
@@ -49,6 +51,7 @@ class KnowledgeBaseService:
                         "uri": item.get("location", {}).get("s3Location", {}).get("uri", ""),
                         "excerpt": item.get("content", {}).get("text", ""),
                         "score": item.get("score", 0.0),
+                        "mode": "live",
                     }
                 )
             return results
@@ -60,11 +63,13 @@ class KnowledgeBaseService:
                     "uri": "s3://knowledge-base/runbooks/lambda-aurora-connections.md",
                     "excerpt": "Use RDS Proxy or tune pool size when Lambda concurrency increases suddenly.",
                     "score": 0.94,
+                    "mode": "fallback",
                 },
                 {
                     "title": "API Gateway 5xx troubleshooting",
                     "uri": "s3://knowledge-base/runbooks/api-gateway-5xx.md",
                     "excerpt": "Correlate request spikes, downstream latency, and recent deployments before scaling blindly.",
                     "score": 0.87,
+                    "mode": "fallback",
                 },
             ]

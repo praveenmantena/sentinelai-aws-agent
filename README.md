@@ -6,6 +6,25 @@ SentinelAI AWS Agent is a production-grade hackathon repository for an event-dri
 
 The platform is built for engineers who need faster incident triage in AWS environments. A CloudWatch alarm or API request enters a Lambda-based agent runtime. The runtime coordinates specialist agents for incident detection, memory lookups, log analysis, knowledge retrieval, reasoning, and remediation.
 
+## Hackathon problem definition and impact
+
+- **Problem:** On-call engineers lose time during incidents correlating logs, alarms, and runbooks under pressure.
+- **Target users:** SRE, DevOps, and platform teams operating AWS workloads.
+- **Expected impact:** Faster triage and more consistent remediation recommendations, improving Mean Time To Resolution (MTTR).
+- **Why this is a real use case:** It addresses operational reliability workflows used by production engineering teams, not a toy/demo-only use case.
+
+## What GenAI does vs deterministic system logic
+
+- **GenAI responsibilities (Amazon Bedrock):**
+  - Summarize operational log evidence (`LogAnalysisAgent`).
+  - Infer likely root cause and confidence (`ReasoningAgent`).
+- **Deterministic responsibilities (application logic):**
+  - Event normalization and orchestration (`IncidentContext`, `AgentGraph`).
+  - Retrieval and persistence workflows (CloudWatch, Bedrock KB, DynamoDB adapters).
+  - API transport, response formatting, and UI approvals workflow.
+
+This separation is designed to keep the workflow explainable while still using LLM reasoning where it provides the highest value.
+
 ## Architecture diagram
 
 ![System Architecture](./diagrams/SentinelAI_System_Architecture.png)
@@ -197,6 +216,8 @@ curl -X POST "$API_ENDPOINT/incidents" \
   ]
 }
 ```
+
+The response also includes a `dependency_status` object showing whether each external dependency ran in `live` or `fallback` mode, plus an `overall_mode` field. This makes demo behavior explicit and transparent.
 
 ## Cleanup instructions
 

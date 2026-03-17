@@ -23,7 +23,7 @@ class BedrockService:
                 "Mock Bedrock response: elevated 5xx rates correlate with downstream latency spikes. "
                 "Investigate database connection saturation and roll back the last configuration change if needed."
             )
-            return {"text": text, "raw": {"mock": True}}
+            return {"text": text, "raw": {"mock": True}, "mode": "fallback", "dependency": "bedrock_runtime"}
 
         try:
             body = {
@@ -37,11 +37,16 @@ class BedrockService:
             payload = json.loads(response["body"].read())
             content = payload.get("content", [])
             text = "\n".join(item.get("text", "") for item in content if item.get("type") == "text")
-            return {"text": text, "raw": payload}
+            return {"text": text, "raw": payload, "mode": "live", "dependency": "bedrock_runtime"}
         except Exception as error:
             log_event("bedrock.invoke.fallback", reason=str(error))
             text = (
                 "Mock Bedrock response: elevated 5xx rates correlate with downstream latency spikes. "
                 "Investigate database connection saturation and roll back the last configuration change if needed."
             )
-            return {"text": text, "raw": {"mock": True, "reason": str(error)}}
+            return {
+                "text": text,
+                "raw": {"mock": True, "reason": str(error)},
+                "mode": "fallback",
+                "dependency": "bedrock_runtime",
+            }

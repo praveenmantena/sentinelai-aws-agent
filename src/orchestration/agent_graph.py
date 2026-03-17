@@ -40,6 +40,9 @@ class AgentGraph:
 
     def finalize(self, incident: IncidentContext, observations: list[AgentObservation], state: dict[str, Any]) -> InvestigationResult:
         reasoning = state.get("reasoning", {})
+        dependency_status = dict(state.get("dependency_status", {}))
+        overall_mode = "fallback" if any(mode == "fallback" for mode in dependency_status.values()) else "live"
+        dependency_status["overall_mode"] = overall_mode
         result = InvestigationResult(
             incident=incident,
             diagnosis=reasoning.get("diagnosis", observations[-1].summary if observations else "No diagnosis generated."),
@@ -49,6 +52,7 @@ class AgentGraph:
             retrieved_documents=state.get("retrieved_documents", []),
             agent_trace=observations,
             model_responses=state.get("model_responses", []),
+            dependency_status=dependency_status,
         )
         self.dynamodb_service.save_result(result)
         return result

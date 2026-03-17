@@ -34,7 +34,9 @@ const approvalSummaryEl = document.getElementById("approval-summary");
 const approvalStatusEl = document.getElementById("approval-status");
 const retrievedDocsEl = document.getElementById("retrieved-docs");
 const agentTraceEl = document.getElementById("agent-trace");
+const dependencyStatusEl = document.getElementById("dependency-status");
 const approvalHistoryEl = document.getElementById("approval-history");
+const executionModeEl = document.getElementById("execution-mode");
 
 const reviewerEl = document.getElementById("reviewer");
 const navInvestigationBtn = document.getElementById("nav-investigation");
@@ -80,6 +82,12 @@ function mockResult(eventPayload) {
       "Create an action item for joint API latency and DB connection dashboard alerts."
     ],
     confidence: 0.81,
+    dependency_status: {
+      cloudwatch_logs: "fallback",
+      bedrock_runtime: "fallback",
+      bedrock_knowledge_base: "fallback",
+      overall_mode: "fallback"
+    },
     retrieved_documents: [
       {
         title: "Connection Pool Runbook",
@@ -176,6 +184,10 @@ async function runInvestigation() {
     });
 
     const responseBody = await response.json();
+    if (!response.ok) {
+      const errorMessage = responseBody?.error || responseBody?.details?.reason || `API request failed (${response.status})`;
+      throw new Error(errorMessage);
+    }
     const result = responseBody.body ? JSON.parse(responseBody.body) : responseBody;
 
     latestResponse = result;
@@ -198,6 +210,8 @@ function renderResult(result) {
   incidentSourceEl.textContent = incident.source || "-";
   rootCauseEl.textContent = result.probable_root_cause || "N/A";
   diagnosisEl.textContent = result.diagnosis || "N/A";
+  const overallMode = result.dependency_status?.overall_mode || "unknown";
+  executionModeEl.textContent = overallMode;
 
   severityChipEl.className = "severity-chip";
   severityChipEl.classList.add(severityClass(severityValue));
@@ -240,6 +254,7 @@ function renderResult(result) {
   rawJsonEl.textContent = JSON.stringify(result, null, 2);
   retrievedDocsEl.textContent = JSON.stringify(result.retrieved_documents || [], null, 2);
   agentTraceEl.textContent = JSON.stringify(result.agent_trace || [], null, 2);
+  dependencyStatusEl.textContent = JSON.stringify(result.dependency_status || {}, null, 2);
   renderApprovalHistory(incident.incident_id || "unknown");
   resultCard.hidden = false;
 }

@@ -15,6 +15,34 @@ class ReasoningAgent(AgentBase):
         super().__init__("reasoning-agent")
         self.bedrock_service = bedrock_service
 
+    def _extract_reasoning(self, text: str) -> dict[str, Any]:
+        parsed: dict[str, Any] = {}
+        try:
+            parsed = json.loads(text)
+        except json.JSONDecodeError:
+            start = text.find("{")
+            end = text.rfind("}")
+            if start != -1 and end != -1 and end > start:
+                try:
+                    parsed = json.loads(text[start : end + 1])
+                except json.JSONDecodeError:
+                    parsed = {}
+
+        diagnosis = str(parsed.get("diagnosis") or text).strip()
+        probable_root_cause = str(parsed.get("probable_root_cause") or "Insufficient evidence from current signals.").strip()
+
+        try:
+            confidence = float(parsed.get("confidence", 0.55))
+        except (TypeError, ValueError):
+            confidence = 0.55
+        confidence = min(max(confidence, 0.0), 1.0)
+
+        return {
+            "diagnosis": diagnosis,
+            "probable_root_cause": probable_root_cause,
+            "confidence": confidence,
+        }
+
     def run(self, incident: IncidentContext, state: dict[str, Any]) -> AgentObservation:
         started = time.perf_counter()
         logs = state.get("logs", [])
@@ -29,15 +57,12 @@ class ReasoningAgent(AgentBase):
         model_response = self.bedrock_service.invoke(prompt=prompt, system_prompt="You are a principal cloud reliability engineer.")
         text = model_response["text"]
         state.setdefault("model_responses", []).append({"agent": self.name, **model_response})
-        state["reasoning"] = {
-            "diagnosis": text,
-            "probable_root_cause": "Database connection saturation amplified by Lambda concurrency",
-            "confidence": 0.82,
-        }
+        state["reasoning"] = self._extract_reasoning(text)
+        state.setdefault("dependency_status", {})["bedrock_runtime"] = model_response.get("mode", "unknown")
         log_event("agent.decision", agent=self.name, incident_id=incident.incident_id, reasoning=text[:240])
         return AgentObservation(
             agent_name=self.name,
-            summary=text,
+            summary=state["reasoning"]["diagnosis"],
             details=state["reasoning"],
             latency_ms=round((time.perf_counter() - started) * 1000, 2),
         )

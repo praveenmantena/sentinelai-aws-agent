@@ -66,6 +66,7 @@ class InvestigationResult:
     retrieved_documents: list[dict[str, Any]] = field(default_factory=list)
     agent_trace: list[AgentObservation] = field(default_factory=list)
     model_responses: list[dict[str, Any]] = field(default_factory=list)
+    dependency_status: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         data = asdict(self)
