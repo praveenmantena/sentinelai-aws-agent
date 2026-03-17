@@ -26,7 +26,7 @@ def build_application() -> OrchestratorAgent:
         LogAnalysisAgent(cloudwatch_service=cloudwatch_service, bedrock_service=bedrock_service),
         KnowledgeRetrievalAgent(knowledgebase_service=knowledgebase_service),
         ReasoningAgent(bedrock_service=bedrock_service),
-        RemediationAgent(),
+        RemediationAgent(bedrock_service=bedrock_service),
     ]
     graph = AgentGraph(agents=agents, dynamodb_service=dynamodb_service)
     return OrchestratorAgent(agent_graph=graph)

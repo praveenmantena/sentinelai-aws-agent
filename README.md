@@ -37,7 +37,7 @@ In `build_application()` (`src/app.py`), agents are configured in this order:
 | LogAnalysisAgent | AI agent | Yes (Bedrock) | Summarize log failure signals |
 | KnowledgeRetrievalAgent | Worker | No (retrieval API only) | Retrieve runbooks from KB |
 | ReasoningAgent | AI agent | Yes (Bedrock) | Infer diagnosis/root cause/confidence |
-| RemediationAgent | Worker | No | Build remediation checklist |
+| RemediationAgent | AI agent | Yes (Bedrock) | Generate incident-specific remediation steps |
 
 ## Hackathon problem definition and impact
 
@@ -51,6 +51,7 @@ In `build_application()` (`src/app.py`), agents are configured in this order:
 - **GenAI responsibilities (Amazon Bedrock):**
   - Summarize operational log evidence (`LogAnalysisAgent`).
   - Infer likely root cause and confidence (`ReasoningAgent`).
+  - Generate incident-specific remediation steps (`RemediationAgent`).
 - **Deterministic responsibilities (application logic):**
   - Event normalization and orchestration (`IncidentContext`, `AgentGraph`).
   - Retrieval and persistence workflows (CloudWatch, Bedrock KB, DynamoDB adapters).
@@ -290,6 +291,7 @@ Expected output checks:
   - `cloudwatch_logs`
   - `bedrock_runtime`
   - `bedrock_knowledge_base`
+  - `bedrock_remediation`
   - `overall_mode`
 - UI shows execution mode (`live` or `fallback`) in the Investigation Response card.
 - If any dependency fails, fallback mode is visible instead of hidden.
