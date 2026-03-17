@@ -41,7 +41,15 @@ class AgentGraph:
     def finalize(self, incident: IncidentContext, observations: list[AgentObservation], state: dict[str, Any]) -> InvestigationResult:
         reasoning = state.get("reasoning", {})
         dependency_status = dict(state.get("dependency_status", {}))
-        overall_mode = "fallback" if any(mode == "fallback" for mode in dependency_status.values()) else "live"
+        modes = list(dependency_status.values())
+        if not modes:
+            overall_mode = "unknown"
+        elif any(mode == "fallback" for mode in modes):
+            overall_mode = "fallback"
+        elif all(mode == "live" for mode in modes):
+            overall_mode = "live"
+        else:
+            overall_mode = "unknown"
         dependency_status["overall_mode"] = overall_mode
         result = InvestigationResult(
             incident=incident,

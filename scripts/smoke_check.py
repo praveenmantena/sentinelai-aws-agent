@@ -17,7 +17,7 @@ def assert_true(condition: bool, message: str) -> None:
 
 
 def main() -> None:
-    event_path = Path("evaluation/api_request.json")
+    event_path = ROOT / "evaluation" / "api_request.json"
     event = json.loads(event_path.read_text(encoding="utf-8"))
 
     result = process_incident(event)

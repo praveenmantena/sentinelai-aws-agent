@@ -18,13 +18,17 @@ class ReasoningAgent(AgentBase):
     def _extract_reasoning(self, text: str) -> dict[str, Any]:
         parsed: dict[str, Any] = {}
         try:
-            parsed = json.loads(text)
+            candidate = json.loads(text)
+            if isinstance(candidate, dict):
+                parsed = candidate
         except json.JSONDecodeError:
             start = text.find("{")
             end = text.rfind("}")
             if start != -1 and end != -1 and end > start:
                 try:
-                    parsed = json.loads(text[start : end + 1])
+                    candidate = json.loads(text[start : end + 1])
+                    if isinstance(candidate, dict):
+                        parsed = candidate
                 except json.JSONDecodeError:
                     parsed = {}
 

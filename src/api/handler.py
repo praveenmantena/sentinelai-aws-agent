@@ -5,6 +5,7 @@ import json
 from typing import Any
 
 from src.app import build_application
+from src.config import CONFIG
 from src.models import IncidentContext
 from src.telemetry import log_event
 
@@ -51,10 +52,12 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
         }
     except json.JSONDecodeError as error:
         log_event("lambda.error", error_type="json_decode_error", message=str(error))
-        return _error_response(400, "Invalid JSON payload", {"reason": str(error)})
+        details = {"reason": str(error)} if CONFIG.environment != "prod" else {}
+        return _error_response(400, "Invalid JSON payload", details)
     except Exception as error:  # noqa: BLE001
         log_event("lambda.error", error_type="unhandled_exception", message=str(error))
-        return _error_response(500, "Investigation failed", {"reason": str(error)})
+        details = {"reason": str(error)} if CONFIG.environment != "prod" else {}
+        return _error_response(500, "Investigation failed", details)
 
 
 def _sample_event() -> dict[str, Any]:

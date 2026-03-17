@@ -45,7 +45,7 @@ class CloudWatchService:
             )
             log_event("cloudwatch.logs.mode", incident_id=incident.incident_id, mode="live")
             return [
-                {"timestamp": item.get("timestamp"), "message": item.get("message", "")}
+                {"timestamp": item.get("timestamp"), "message": item.get("message", ""), "mode": "live"}
                 for item in response.get("events", [])
             ]
         except Exception as error:
