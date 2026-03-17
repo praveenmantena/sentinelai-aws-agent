@@ -5,6 +5,7 @@ import json
 from typing import Any
 
 from src.app import build_application
+from src.config import CONFIG
 from src.models import IncidentContext
 from src.telemetry import log_event
 
@@ -19,6 +20,18 @@ def _normalize_event(event: dict[str, Any]) -> dict[str, Any]:
     return event
 
 
+def _error_response(status_code: int, message: str, details: dict[str, Any] | None = None) -> dict[str, Any]:
+    payload = {
+        "error": message,
+        "details": details or {},
+    }
+    return {
+        "statusCode": status_code,
+        "headers": {"Content-Type": "application/json"},
+        "body": json.dumps(payload, default=str),
+    }
+
+
 def process_incident(event: dict[str, Any]) -> dict[str, Any]:
     normalized_event = _normalize_event(event)
     incident = IncidentContext.from_event(normalized_event)
@@ -30,12 +43,21 @@ def process_incident(event: dict[str, Any]) -> dict[str, Any]:
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     log_event("lambda.invoked", event=event)
-    result = process_incident(event)
-    return {
-        "statusCode": 200,
-        "headers": {"Content-Type": "application/json"},
-        "body": json.dumps(result, default=str),
-    }
+    try:
+        result = process_incident(event)
+        return {
+            "statusCode": 200,
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps(result, default=str),
+        }
+    except json.JSONDecodeError as error:
+        log_event("lambda.error", error_type="json_decode_error", message=str(error))
+        details = {"reason": str(error)} if CONFIG.environment != "prod" else {}
+        return _error_response(400, "Invalid JSON payload", details)
+    except Exception as error:  # noqa: BLE001
+        log_event("lambda.error", error_type="unhandled_exception", message=str(error))
+        details = {"reason": str(error)} if CONFIG.environment != "prod" else {}
+        return _error_response(500, "Investigation failed", details)
 
 
 def _sample_event() -> dict[str, Any]:

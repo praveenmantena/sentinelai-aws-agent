@@ -25,10 +25,12 @@ class CloudWatchService:
                 {
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                     "message": "ERROR Connection pool exhausted for aurora-prod cluster",
+                    "mode": "fallback",
                 },
                 {
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                     "message": "WARN API latency p95 breached threshold after deployment 2026.03.16.2",
+                    "mode": "fallback",
                 },
             ]
 
@@ -41,8 +43,9 @@ class CloudWatchService:
                 endTime=end_time,
                 limit=CONFIG.max_log_events,
             )
+            log_event("cloudwatch.logs.mode", incident_id=incident.incident_id, mode="live")
             return [
-                {"timestamp": item.get("timestamp"), "message": item.get("message", "")}
+                {"timestamp": item.get("timestamp"), "message": item.get("message", ""), "mode": "live"}
                 for item in response.get("events", [])
             ]
         except Exception as error:
@@ -51,9 +54,11 @@ class CloudWatchService:
                 {
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                     "message": "ERROR Connection pool exhausted for aurora-prod cluster",
+                    "mode": "fallback",
                 },
                 {
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                     "message": "WARN API latency p95 breached threshold after deployment 2026.03.16.2",
+                    "mode": "fallback",
                 },
             ]

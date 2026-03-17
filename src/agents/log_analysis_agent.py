@@ -28,6 +28,9 @@ class LogAnalysisAgent(AgentBase):
         model_response = self.bedrock_service.invoke(prompt=prompt, system_prompt="Summarize logs for an SRE incident responder.")
         state["logs"] = logs
         state.setdefault("model_responses", []).append({"agent": self.name, **model_response})
+        cloudwatch_mode = "fallback" if any(item.get("mode") == "fallback" for item in logs) else "live"
+        state.setdefault("dependency_status", {})["cloudwatch_logs"] = cloudwatch_mode
+        state.setdefault("dependency_status", {})["bedrock_runtime"] = model_response.get("mode", "unknown")
         summary = model_response["text"]
         log_event("agent.decision", agent=self.name, incident_id=incident.incident_id, log_count=len(logs))
         return AgentObservation(

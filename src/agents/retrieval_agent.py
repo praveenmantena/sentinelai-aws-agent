@@ -19,6 +19,8 @@ class KnowledgeRetrievalAgent(AgentBase):
         retrieval_query = incident.query or f"{incident.title} {incident.description}"
         documents = self.knowledgebase_service.retrieve(retrieval_query)
         state["retrieved_documents"] = documents
+        kb_mode = "fallback" if any(item.get("mode") == "fallback" for item in documents) else "live"
+        state.setdefault("dependency_status", {})["bedrock_knowledge_base"] = kb_mode
         log_event("agent.decision", agent=self.name, incident_id=incident.incident_id, documents=len(documents))
         summary = f"Retrieved {len(documents)} relevant knowledge documents."
         return AgentObservation(

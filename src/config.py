@@ -8,6 +8,7 @@ from dataclasses import dataclass
 class AppConfig:
     aws_region: str = os.getenv("AWS_REGION", "us-east-1")
     bedrock_model_id: str = os.getenv("BEDROCK_MODEL_ID", "anthropic.claude-3-5-sonnet-20241022-v2:0")
+    bedrock_inference_profile_id: str = os.getenv("BEDROCK_INFERENCE_PROFILE_ID", "")
     knowledge_base_id: str = os.getenv("BEDROCK_KNOWLEDGE_BASE_ID", "")
     knowledge_bucket: str = os.getenv("KNOWLEDGE_BUCKET", "")
     incidents_table: str = os.getenv("INCIDENTS_TABLE", "sentinelai-aws-agent-incidents")
