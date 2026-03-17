@@ -1,10 +1,43 @@
 # SentinelAI AWS Agent
 
-SentinelAI AWS Agent is a production-grade hackathon repository for an event-driven, multi-agent AWS incident response assistant. It listens for operational incidents, pulls evidence from logs, grounds reasoning with Bedrock Knowledge Bases, and produces root-cause analysis plus remediation guidance.
+SentinelAI AWS Agent is a **hackathon MVP** for an event-driven, multi-agent AWS incident response assistant. It listens for operational incidents, pulls evidence from logs, grounds reasoning with Bedrock Knowledge Bases, and produces root-cause analysis plus remediation guidance.
+
+> This repository is intended for demo and learning purposes. It is **not production-ready** and does not claim production hardening.
 
 ## Project overview
 
 The platform is built for engineers who need faster incident triage in AWS environments. A CloudWatch alarm or API request enters a Lambda-based agent runtime. The runtime coordinates specialist agents for incident detection, memory lookups, log analysis, knowledge retrieval, reasoning, and remediation.
+
+## Exact runtime flow (current implementation)
+
+### Entry paths
+1. **Event-driven**: CloudWatch Alarm -> EventBridge -> Lambda handler (`src/api/handler.py`)
+2. **Request-driven**: API Gateway `POST /incidents` -> Lambda handler (`src/api/handler.py`)
+
+### Agent execution order
+In `build_application()` (`src/app.py`), agents are configured in this order:
+1. IncidentDetectionAgent
+2. MemoryAgent
+3. LogAnalysisAgent
+4. KnowledgeRetrievalAgent
+5. ReasoningAgent
+6. RemediationAgent
+
+### Sequential vs parallel
+- **Current behavior:** all agents execute **sequentially** in `StrandsWorkflow.execute()` (`src/strands_runtime.py`).
+- **Parallel behavior today:** none at agent level.
+- **Future optimization idea:** run memory/log retrieval/KB retrieval in parallel before reasoning.
+
+## Agent types: AI agents vs non-LLM workers
+
+| Agent | Type | Uses LLM at runtime? | Role |
+|---|---|---|---|
+| IncidentDetectionAgent | Worker | No | Normalize incident payload |
+| MemoryAgent | Worker | No | Fetch/save incident history |
+| LogAnalysisAgent | AI agent | Yes (Bedrock) | Summarize log failure signals |
+| KnowledgeRetrievalAgent | Worker | No (retrieval API only) | Retrieve runbooks from KB |
+| ReasoningAgent | AI agent | Yes (Bedrock) | Infer diagnosis/root cause/confidence |
+| RemediationAgent | Worker | No | Build remediation checklist |
 
 ## Hackathon problem definition and impact
 
@@ -64,6 +97,31 @@ This separation is designed to keep the workflow explainable while still using L
 - Strands-compatible agent orchestration pattern
 - Streamlit UI for response review and remediation approvals
 
+## Cost considerations (hackathon view)
+
+### If idle (deployed, no traffic)
+- No meaningful Lambda/API per-request cost when there are no invocations.
+- Ongoing baseline cost may still exist from provisioned/storage resources, especially:
+  - OpenSearch Serverless (for Bedrock Knowledge Base backend)
+  - S3 storage
+  - DynamoDB storage
+  - CloudWatch log storage
+
+### If active (during demo/investigations)
+Main cost drivers are:
+- Bedrock model inference (LogAnalysisAgent + ReasoningAgent)
+- Bedrock Knowledge Base retrieval requests
+- Lambda invocation duration and memory
+- API Gateway requests
+- CloudWatch log queries (`FilterLogEvents`)
+
+### Practical way to estimate
+1. Define expected demo load (incidents/hour, average logs/documents, average token usage).
+2. Use AWS Pricing Calculator for Lambda, API Gateway, Bedrock, OpenSearch Serverless, S3, DynamoDB.
+3. Validate with CloudWatch usage metrics after a test run.
+
+For hackathon judging, you can present cost as **low at idle in local mode**, with active cost mostly driven by Bedrock usage.
+
 ## Setup instructions
 
 ```bash
@@ -85,6 +143,25 @@ export INCIDENTS_TABLE=<dynamodb-table-name>
 ```
 
 If your selected Bedrock model requires an inference profile for live invocation, set `BEDROCK_INFERENCE_PROFILE_ID`. When set, it is used instead of `BEDROCK_MODEL_ID`.
+
+### Environment variable defaults
+
+Defaults are defined in `src/config.py`.
+
+| Variable | Default |
+|---|---|
+| `AWS_REGION` | `us-east-1` |
+| `BEDROCK_MODEL_ID` | `anthropic.claude-3-5-sonnet-20241022-v2:0` |
+| `BEDROCK_INFERENCE_PROFILE_ID` | `""` (empty) |
+| `BEDROCK_KNOWLEDGE_BASE_ID` | `""` (empty) |
+| `KNOWLEDGE_BUCKET` | `""` (empty) |
+| `INCIDENTS_TABLE` | `sentinelai-aws-agent-incidents` |
+| `LOG_GROUP_NAME` | `/aws/lambda/sentinelai-aws-agent` |
+| `API_STAGE` | `prod` |
+| `APP_ENV` | `local` |
+| `ENABLE_AUTO_REMEDIATION` | `false` |
+| `MAX_LOG_EVENTS` | `50` |
+| `MAX_DOCUMENTS` | `5` |
 
 ## Infrastructure deployment steps
 
@@ -219,6 +296,17 @@ Expected output checks:
 
 For a full presentation flow, see: `docs/hackathon-demo-runbook.md`
 For judge Q&A preparation, see: `docs/hackathon-judge-qa.md`
+
+## Documentation map
+
+- Architecture overview: `docs/architecture.md`
+- Agent design details: `docs/agent-design.md`
+- Request/response flow: `docs/request-response-flow.md`
+- RAG pipeline notes: `docs/rag-pipeline.md`
+- Deployment notes: `docs/deployment.md`
+- S3 web app guide: `docs/s3-webapp.md`
+- Hackathon demo runbook: `docs/hackathon-demo-runbook.md`
+- Hackathon judge Q&A: `docs/hackathon-judge-qa.md`
 
 ## Example AI response
 
