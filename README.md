@@ -79,9 +79,12 @@ Set environment variables as needed:
 ```bash
 export AWS_REGION=us-east-1
 export BEDROCK_MODEL_ID=anthropic.claude-3-5-sonnet-20241022-v2:0
+export BEDROCK_INFERENCE_PROFILE_ID=<optional-inference-profile-id>
 export BEDROCK_KNOWLEDGE_BASE_ID=<knowledge-base-id>
 export INCIDENTS_TABLE=<dynamodb-table-name>
 ```
+
+If your selected Bedrock model requires an inference profile for live invocation, set `BEDROCK_INFERENCE_PROFILE_ID`. When set, it is used instead of `BEDROCK_MODEL_ID`.
 
 ## Infrastructure deployment steps
 
@@ -196,6 +199,26 @@ curl -X POST "$API_ENDPOINT/incidents" \
   -H "Content-Type: application/json" \
   -d @evaluation/api_request.json
 ```
+
+## Demo validation checklist
+
+Use this exact payload for judging demos:
+
+`evaluation/api_request.json`
+
+Expected output checks:
+
+- Response contains: `incident`, `diagnosis`, `probable_root_cause`, `confidence`, `remediation_plan`.
+- Response contains `dependency_status` with:
+  - `cloudwatch_logs`
+  - `bedrock_runtime`
+  - `bedrock_knowledge_base`
+  - `overall_mode`
+- UI shows execution mode (`live` or `fallback`) in the Investigation Response card.
+- If any dependency fails, fallback mode is visible instead of hidden.
+
+For a full presentation flow, see: `docs/hackathon-demo-runbook.md`
+For judge Q&A preparation, see: `docs/hackathon-judge-qa.md`
 
 ## Example AI response
 
